@@ -8,8 +8,8 @@ using UnityEngine.SceneManagement;
 public class PlayerController : MonoBehaviour {
 
 	public float speed;
-	public float maxSpeed;
-	public float jumpForce;
+	public float maxSpeed = 70f;
+	public float jumpForce = 350f;
 
 	public bool isGrounded;
 
@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour {
 
 	public AudioClip jumpSfx;
 	public AudioClip coinCollect;
+	public AudioClip gemCollect;
 	public AudioClip damageSfx;
 
 	AudioSource audio;
@@ -27,15 +28,17 @@ public class PlayerController : MonoBehaviour {
 	private GameMaster gm;
 
 	//health stats
-	public int curHealth; //current health integer
-	public int maxHealth = 3; //full health is 3
-	public bool deathCheck; //checks if player is dead
-	public bool hurt; //checks if player is damaged
-
+	public int curHealth;
+	public int maxHealth = 3;
+	public bool deathCheck;
+	public bool hurt;
 
 	//projectile
-	public Transform bulletPoint;
-	public GameObject bullet;
+	//public Transform bulletPoint;
+	//public GameObject bullet;
+
+	//Game Over overlay
+	public GameObject gameOverScreen;
 
 
 
@@ -47,19 +50,19 @@ public class PlayerController : MonoBehaviour {
 
 		audio = GetComponent<AudioSource> (); // get access to Audio component
 
-		gm = GameObject.FindGameObjectWithTag ("Game Master").GetComponent<GameMaster> (); // get access to Game Master script
+		gm = GameObject.FindGameObjectWithTag ("GameMaster").GetComponent<GameMaster> (); // get access to Game Master script
 
-
+		gameOverScreen.SetActive (false);
 
 	}
 
 
 	void Update () {
 
-		anim.SetBool ("IsGrounded", isGrounded); //setting grounded value in animation
+		anim.SetBool ("isGrounded", isGrounded); //setting grounded value in animation
 		anim.SetFloat ("Speed", Mathf.Abs(rigiBody.velocity.x)); // setting speed value in animation; Mathf.Abs allows us to use the absolute value of the variable
-		anim.SetBool("IsAlive", deathCheck); //setting ISAlive animation parameter
-		anim.SetBool("IsDamaged", hurt); //setting IsDamaged animation parameter
+		anim.SetBool ("IsAlive", deathCheck); //setting IsAlive animator parameter
+		anim.SetBool ("IsDamaged", hurt); //setting IsDamaged animator parameter
 
 
 		float h = Input.GetAxis ("Horizontal");
@@ -105,7 +108,7 @@ public class PlayerController : MonoBehaviour {
 
 		if (curHealth > maxHealth) {
 
-			curHealth = maxHealth; // always sets health to max (3) at start of game
+			curHealth = maxHealth; // always sets health to max (3) at the start of the game
 
 		}
 
@@ -115,10 +118,21 @@ public class PlayerController : MonoBehaviour {
 
 		}
 
-		if (Input.GetKeyDown (KeyCode.Z)) {
+		//if (Input.GetKeyDown (KeyCode.Z)) {
 
+		//	Instantiate (bullet, bulletPoint.position, bulletPoint.rotation);
 
-			Instantiate (bullet, bulletPoint.position, bulletPoint.rotation);
+		//}
+
+		if (Input.GetKeyDown (KeyCode.R)) {
+
+			SceneManager.LoadScene (SceneManager.GetActiveScene ().buildIndex);
+
+		}
+
+		if (!deathCheck) {
+
+			Time.timeScale = 1;
 
 		}
 
@@ -143,11 +157,21 @@ public class PlayerController : MonoBehaviour {
 
 		}
 
+		if (col.CompareTag ("Gem")) {
+
+			Destroy(col.gameObject);
+			gm.points += 5;
+			audio.PlayOneShot (gemCollect, 1.0f);
 
 
-		if (col.CompareTag ("Level 2 Trigger")) {
+		}
 
-			SceneManager.LoadScene ("Level 2");
+
+
+
+		if (col.CompareTag ("TriggerBox")) {
+
+			SceneManager.LoadScene ("Level2");
 
 			Debug.Log ("SCENE CHANGED");
 
@@ -189,24 +213,31 @@ public class PlayerController : MonoBehaviour {
 			rigiBody.velocity = new Vector2 ( -maxSpeed, 0f );
 
 		}
-
 	}
+
 
 	void Death () {
 
 		deathCheck = true;
-		Debug.Log ("Player is dead");
+		gameOverScreen.SetActive (true); //turning on game over screen
+		//Debug.Log ("Player is dead");
 		//reload scene or respawn
-		SceneManager.LoadScene("level1");
+		//SceneManager.LoadScene("Level1");
 
+		if (deathCheck) {
+
+			Debug.Log ("Player is Dead");
+
+			Time.timeScale = 0; //pause or freeze
+
+		}
 
 	}
 
 	IEnumerator DelayedRestart () {
 
-		yield return new WaitForSeconds (1); //delay by time
+		yield return new WaitForSeconds (1); //delay the time
 		Death();
-
 
 	}
 
@@ -217,6 +248,5 @@ public class PlayerController : MonoBehaviour {
 
 
 	}
-
 
 }
