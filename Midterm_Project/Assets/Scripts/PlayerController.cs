@@ -38,7 +38,7 @@ public class PlayerController : MonoBehaviour {
 	//public GameObject bullet;
 
 	//Game Over overlay
-	public GameObject gameOverScreen;
+	//public GameObject gameOverScreen;
 
 
 
@@ -52,7 +52,7 @@ public class PlayerController : MonoBehaviour {
 
 		gm = GameObject.FindGameObjectWithTag ("GameMaster").GetComponent<GameMaster> (); // get access to Game Master script
 
-		gameOverScreen.SetActive (false);
+		//gameOverScreen.SetActive (false);
 
 	}
 
@@ -219,7 +219,8 @@ public class PlayerController : MonoBehaviour {
 	void Death () {
 
 		deathCheck = true;
-		gameOverScreen.SetActive (true); //turning on game over screen
+		//gameOverScreen.SetActive (true); //turning on game over screen
+
 		//Debug.Log ("Player is dead");
 		//reload scene or respawn
 		//SceneManager.LoadScene("Level1");
